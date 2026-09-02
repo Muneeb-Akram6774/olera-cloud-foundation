@@ -1,0 +1,27 @@
+PS D:\olera-cloud-foundation\environments\prod> terraform init
+Initializing the backend...
+
+Successfully configured the backend "s3"! Terraform will automatically
+use this backend unless the backend configuration changes.
+
+Initializing provider plugins...
+
+
+│ Warning: Deprecated Parameter
+│ 
+│   on backend.tf line 8, in terraform:
+│    8:     dynamodb_table = "olera-cloud-foundation-locks"
+│ 
+│ The parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile" instead.
+╵
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+PS D:\olera-cloud-foundation\environments\prod> terraform validate
+Success! The configuration is valid.

@@ -1,47 +1,84 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+
 provider "aws" {
-  region  = var.region
+  region = var.aws_region
 }
 
-resource "aws_s3_bucket" "terraform_state" {
-    bucket = var.olera-s3-bucket
-    force_destroy = true
 
-    tags = {
-        Name = "Olera State Files Bucket"
-        s3_environment = var.s3_environment
+data "aws_caller_identity" "current" {}
+
+locals {
+  state_bucket_name = "olera-cloud-foundation-tfstate-${data.aws_caller_identity.current.account_id}"
+  lock_table_name   = "olera-cloud-foundation-locks"
+}
+
+resource "aws_s3_bucket" "state" {
+  bucket        = local.state_bucket_name
+  force_destroy = false
+
+  tags = {
+    Name      = local.state_bucket_name
+    Project   = "olera-cloud-foundation"
+    Purpose   = "terraform-remote-state"
+    ManagedBy = "terraform-bootstrap"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "state" {
+  bucket = aws_s3_bucket.state.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
+  bucket = aws_s3_bucket.state.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
     }
-
+  }
 }
 
-resource "aws_s3_bucket_versioning" "bucket_versioning" {
-    bucket = aws_s3_bucket.terraform_state.id
-    versioning_configuration {
-      status = "Enabled"
-    }
+resource "aws_s3_bucket_public_access_block" "state" {
+  bucket = aws_s3_bucket.state.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "bucket_encryption" {
-    bucket = aws_s3_bucket.terraform_state.id
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-}
 
+resource "aws_s3_bucket_ownership_controls" "state" {
+  bucket = aws_s3_bucket.state.id
+
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
+}
 
 resource "aws_dynamodb_table" "terraform_locks" {
-    name = var.olera_dynamodb_table
-    billing_mode = "PAY_PER_REQUEST"
-    hash_key = "LockID"
+  name         = local.lock_table_name
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
 
-    attribute {
-      name = "LockID"
-      type = "S"
-    }
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
 
-    tags = {
-        Name = "Olera Lock Table"
-        s3_environment = var.s3_environment
-    }
+  tags = {
+    Name      = local.lock_table_name
+    Project   = "olera-cloud-foundation"
+    Purpose   = "terraform-state-locking-legacy"
+    ManagedBy = "terraform-bootstrap"
+  }
 }
