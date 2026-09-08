@@ -61,3 +61,9 @@ variable "private_subnet_cidrs" {
     error_message = "private_subnet_cidrs must contain exactly one CIDR block per AZ."
   }
 }
+
+variable "common_tags" {
+  type = map(string)
+  description = "Common tags applied to all taggable network resources."
+  
+}

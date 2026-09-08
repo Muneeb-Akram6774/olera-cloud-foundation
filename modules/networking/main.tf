@@ -14,12 +14,6 @@ locals {
       cidr = var.private_subnet_cidrs[local.az_index[az]]
     }
   }
-
-  common_tags = {
-    Project     = "olera-cloud-foundation"
-    Environment = var.environment
-    ManagedBy   = "terraform"
-  }
 }
 
 resource "aws_vpc" "this" {
@@ -27,7 +21,7 @@ resource "aws_vpc" "this" {
   enable_dns_support   = true
   enable_dns_hostnames = true
 
-  tags = merge(local.common_tags, {
+  tags = merge(var.common_tags, {
     Name = "olera-${var.environment}-vpc"
     Tier = "network"
   })
@@ -41,7 +35,7 @@ resource "aws_subnet" "public" {
   cidr_block              = each.value.cidr
   map_public_ip_on_launch = true
 
-  tags = merge(local.common_tags, {
+  tags = merge(var.common_tags, {
     Name = "olera-${var.environment}-public-${each.key}"
     Tier = "public"
   })
@@ -54,7 +48,7 @@ resource "aws_subnet" "private" {
   availability_zone = each.key
   cidr_block        = each.value.cidr
 
-  tags = merge(local.common_tags, {
+  tags = merge(var.common_tags, {
     Name = "olera-${var.environment}-private-${each.key}"
     Tier = "private"
   })
@@ -63,7 +57,7 @@ resource "aws_subnet" "private" {
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
 
-  tags = merge(local.common_tags, {
+  tags = merge(var.common_tags, {
     Name = "olera-${var.environment}-igw"
   })
 }
@@ -71,7 +65,7 @@ resource "aws_internet_gateway" "this" {
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
 
-  tags = merge(local.common_tags, {
+  tags = merge(var.common_tags, {
     Name = "olera-${var.environment}-public-rt"
     Tier = "public"
   })
@@ -95,7 +89,7 @@ resource "aws_eip" "nat" {
 
   domain = "vpc"
 
-  tags = merge(local.common_tags, {
+  tags = merge(var.common_tags, {
     Name = "olera-${var.environment}-nat-eip-${each.key}"
     Tier = "nat"
   })
@@ -109,7 +103,7 @@ resource "aws_nat_gateway" "this" {
   allocation_id = aws_eip.nat[each.key].id
   subnet_id     = aws_subnet.public[each.key].id
 
-  tags = merge(local.common_tags, {
+  tags = merge(var.common_tags, {
     Name = "olera-${var.environment}-nat-${each.key}"
     Tier = "nat"
   })
@@ -122,7 +116,7 @@ resource "aws_route_table" "private" {
 
   vpc_id = aws_vpc.this.id
 
-  tags = merge(local.common_tags, {
+  tags = merge(var.common_tags, {
     Name = "olera-${var.environment}-private-rt-${each.key}"
     Tier = "private"
   })
