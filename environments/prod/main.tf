@@ -1,3 +1,11 @@
+locals {
+  common_tags = {
+    Project     = "olera-cloud-foundation"
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
+}
+
 module "networking" {
   source = "../../modules/networking"
 
@@ -6,4 +14,6 @@ module "networking" {
   azs                  = var.azs
   public_subnet_cidrs  = var.public_subnet_cidrs
   private_subnet_cidrs = var.private_subnet_cidrs
+
+  common_tags = local.common_tags
 }
