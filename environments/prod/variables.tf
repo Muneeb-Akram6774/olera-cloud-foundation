@@ -28,3 +28,14 @@ variable "private_subnet_cidrs" {
   description = "Private subnet CIDRs, one per AZ."
   type        = list(string)
 }
+
+variable "budget_amount" {
+  type        = number
+  description = "Monthly AWS budget in USD."
+  default     = 100
+}
+
+variable "notification_email" {
+  type        = string
+  description = "Email address for AWS budget alerts."
+}

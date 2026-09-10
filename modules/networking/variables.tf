@@ -63,7 +63,7 @@ variable "private_subnet_cidrs" {
 }
 
 variable "common_tags" {
-  type = map(string)
+  type        = map(string)
   description = "Common tags applied to all taggable network resources."
-  
+
 }

@@ -17,3 +17,20 @@ module "networking" {
 
   common_tags = local.common_tags
 }
+
+module "iam_boundary" {
+  source = "../../modules/iam-boundary"
+
+  environment      = var.environment
+  aws_region       = var.aws_region
+  state_bucket_arn = "arn:aws:s3:::olera-cloud-foundation-tfstate-830894827069"
+  lock_table_arn   = "arn:aws:dynamodb:${var.aws_region}:830894827069:table/olera-cloud-foundation-locks"
+}
+
+module "budget_alert" {
+  source = "../../modules/budget-alert"
+
+  environment        = var.environment
+  budget_amount      = var.budget_amount
+  notification_email = var.notification_email
+}
