@@ -34,3 +34,5 @@ module "budget_alert" {
   budget_amount      = var.budget_amount
   notification_email = var.notification_email
 }
+
+# Test GitHub Actions Terraform plan
