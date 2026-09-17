@@ -36,4 +36,4 @@ module "budget_alert" {
 }
 
 
-# Testing terraform CI plan 
+# CI test: Terraform plan workflow
